@@ -231,12 +231,21 @@ func (s *Struct) Fields() []*Field {
 //
 // It panics if s's kind is not struct.
 func (s *Struct) Names() []string {
-	fields := getFields(s.value, s.TagName)
+	fields := s.structFields()
 
 	names := make([]string, len(fields))
 
 	for i, field := range fields {
-		names[i] = field.Name()
+		tagName, _ := parseTag(field.Tag.Get(s.TagName))
+		if tagName == "-" {
+			continue
+		}
+
+		if tagName != "" {
+			field.Name = tagName
+		}
+
+		names[i] = field.Name
 	}
 
 	return names
